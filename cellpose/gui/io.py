@@ -365,7 +365,7 @@ def _load_masks(parent, filename=None):
             )
         filename = name[0]
     print(f'GUI_INFO: loading masks: {filename}')
-    masks = imread(filename)
+    masks = imread(filename)[0]
     outlines = None
     if masks.ndim>3:
         # Z x nchannels x Ly x Lx
