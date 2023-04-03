@@ -247,7 +247,7 @@ def main():
             tqdm_out = utils.TqdmToLogger(logger,level=logging.INFO)
             
             for image_name in tqdm(image_names, file=tqdm_out):
-                image = io.imread(image_name)
+                image = io.imread(image_name)[0]
                 out = model.eval(image, channels=channels, diameter=diameter,
                                 do_3D=args.do_3D, net_avg=(not args.fast_mode or args.net_avg),
                                 augment=False,
