@@ -93,6 +93,7 @@ def main():
     output_args.add_argument('--save_outlines', action='store_true', help='whether or not to save RGB outline images when masks are saved (disabled by default)')
     output_args.add_argument('--save_ncolor', action='store_true', help='whether or not to save minimal "n-color" masks (disabled by default')
     output_args.add_argument('--save_txt', action='store_true', help='flag to enable txt outlines for ImageJ (disabled by default)')
+    output_args.add_argument('--save_meta_data', action='store_true', help='flag to enable txt outlines for ImageJ (disabled by default)')
 
     # training settings
     training_args = parser.add_argument_group("training arguments")
@@ -247,7 +248,8 @@ def main():
             tqdm_out = utils.TqdmToLogger(logger,level=logging.INFO)
             
             for image_name in tqdm(image_names, file=tqdm_out):
-                image = io.imread(image_name)[0]
+                image, save_imageJ_meta_data = io.imread(image_name)
+                
                 out = model.eval(image, channels=channels, diameter=diameter,
                                 do_3D=args.do_3D, net_avg=(not args.fast_mode or args.net_avg),
                                 augment=False,
@@ -274,10 +276,10 @@ def main():
                 if not args.no_npy:
                     io.masks_flows_to_seg(image, masks, flows, diams, image_name, channels)
                 if saving_something:
-                    io.save_masks(image, masks, flows, image_name, png=args.save_png, tif=args.save_tif,
+                    io.save_masks(image, masks, flows, image_name, save_imageJ_meta_data, png=args.save_png, tif=args.save_tif,
                                   save_flows=args.save_flows,save_outlines=args.save_outlines,
                                   save_ncolor=args.save_ncolor,dir_above=args.dir_above,savedir=args.savedir,
-                                  save_txt=args.save_txt,in_folders=args.in_folders)
+                                  save_txt=args.save_txt, save_meta_data=args.save_imageJ_meta_data,in_folders=args.in_folders)
             logger.info('>>>> completed in %0.3f sec'%(time.time()-tic))
         else:
             
