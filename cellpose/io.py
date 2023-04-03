@@ -74,6 +74,19 @@ def imread(filename):
     ext = os.path.splitext(filename)[-1].lower()
     if ext== '.tif' or ext=='.tiff':
         with tifffile.TiffFile(filename) as tif:
+            
+            ##########
+            ########## IF WE HAVE ImageJ metadata 
+            volume = tif.asarray()
+            axes = tif.series[0].axes
+            imagej_metadata = tif.imagej_metadata
+            volume.shape
+            imagej_metadata['slices']
+            imagej_metadata['frames']
+            imageJ_meta_data = [imagej_metadata['frames'], imagej_metadata['slices']]
+            ##########
+            ##########
+            
             ltif = len(tif.pages)
             try:
                 full_shape = tif.shaped_metadata[0]['shape']
@@ -94,7 +107,14 @@ def imread(filename):
                 for i,page in enumerate(tqdm(tif.series[0])):
                     img[i] = page.asarray()
                 img = img.reshape(full_shape)            
-        return img
+        
+        #return img
+        ##########
+        ########## IF WE HAVE ImageJ metadata 
+        return img, imageJ_meta_data
+        ##########
+        ##########
+    
     elif ext != '.npy':
         try:
             img = cv2.imread(filename, -1)#cv2.LOAD_IMAGE_ANYDEPTH)
