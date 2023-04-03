@@ -75,7 +75,7 @@ def _remove_model(parent, ind=None, verbose=True):
 
 def _get_train_set(image_names):
     """ get training data and labels for images in current folder image_names"""
-    train_data, train_labels, train_files = [], [], []
+    train_data, train_labels, train_files, imageJ_meta_data = [], [], [], []
     for image_name_full in image_names:
         image_name = os.path.splitext(image_name_full)[0]
         label_name = None
@@ -89,9 +89,10 @@ def _get_train_set(image_names):
                 print(f'GUI_INFO: _seg.npy found for {image_name} but masks.ndim!=2')
         if label_name is not None:
             train_files.append(image_name_full)
-            train_data.append(imread(image_name_full))
+            train_data.append(imread(image_name_full)[0])
             train_labels.append(masks)
-    return train_data, train_labels, train_files
+            imageJ_meta_data.append(imread(image_name_full)[1])
+    return train_data, train_labels, train_files, imageJ_meta_data
 
 def _load_image(parent, filename=None, load_seg=True):
     """ load image with filename; if None, open QFileDialog """
@@ -104,11 +105,11 @@ def _load_image(parent, filename=None, load_seg=True):
     load_mask = False
     if load_seg:
         if os.path.isfile(manual_file) and not parent.autoloadMasks.isChecked():
-            _load_seg(parent, manual_file, image=imread(filename), image_file=filename)
+            _load_seg(parent, manual_file, image=imread(filename)[0], image_file=filename)
             return
         elif os.path.isfile(os.path.splitext(filename)[0]+'_manual.npy'):
             manual_file = os.path.splitext(filename)[0]+'_manual.npy'
-            _load_seg(parent, manual_file, image=imread(filename), image_file=filename)
+            _load_seg(parent, manual_file, image=imread(filename)[0], image_file=filename)
             return
         elif parent.autoloadMasks.isChecked():
             mask_file = os.path.splitext(filename)[0]+'_masks'+os.path.splitext(filename)[-1]
@@ -116,7 +117,7 @@ def _load_image(parent, filename=None, load_seg=True):
             load_mask = True if os.path.isfile(mask_file) else False
     try:
         print(f'GUI_INFO: loading image: {filename}')
-        image = imread(filename)
+        image = imread(filename)[0]
         parent.loaded = True
     except Exception as e:
         print('ERROR: images not compatible')
@@ -244,7 +245,7 @@ def _load_seg(parent, filename=None, image=None, image_file=None):
                     found_image = True
         if found_image:
             try:
-                image = imread(parent.filename)
+                image = imread(parent.filename)[0]
             except:
                 parent.loaded = False
                 found_image = False
